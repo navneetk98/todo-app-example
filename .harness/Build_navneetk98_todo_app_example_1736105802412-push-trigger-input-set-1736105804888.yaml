@@ -1,0 +1,14 @@
+inputSet:
+  name: Build_navneetk98_todo_app_example_1736105802412-push-trigger-input-set
+  identifier: Build_navneetk98_todo_app_example_1736105802412pushtriggerinputset
+  orgIdentifier: default
+  projectIdentifier: default_project
+  pipeline:
+    identifier: Build_navneetk98_todo_app_example_1736105802412
+    properties:
+      ci:
+        codebase:
+          build:
+            type: branch
+            spec:
+              branch: <+trigger.branch>
