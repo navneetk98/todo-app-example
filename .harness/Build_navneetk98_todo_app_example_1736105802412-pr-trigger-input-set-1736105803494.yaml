@@ -1,0 +1,14 @@
+inputSet:
+  name: Build_navneetk98_todo_app_example_1736105802412-pr-trigger-input-set
+  identifier: Build_navneetk98_todo_app_example_1736105802412prtriggerinputset
+  orgIdentifier: default
+  projectIdentifier: default_project
+  pipeline:
+    identifier: Build_navneetk98_todo_app_example_1736105802412
+    properties:
+      ci:
+        codebase:
+          build:
+            type: PR
+            spec:
+              number: <+trigger.prNumber>
