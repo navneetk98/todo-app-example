@@ -54,14 +54,22 @@ pipeline:
         delegateSelectors:
           - kubernetes-delegate-laptop
     - stage:
-        name: dpeloy
+        name: deploy
         identifier: dpeloy
         description: ""
         type: Deployment
         spec:
           deploymentType: Kubernetes
           service:
-            serviceRef: testtodoservice
+            serviceRef: tododocker
+            serviceInputs:
+              serviceDefinition:
+                type: Kubernetes
+                spec:
+                  artifacts:
+                    primary:
+                      primaryArtifactRef: <+input>
+                      sources: <+input>
           environment:
             environmentRef: qa
             deployToAll: false
