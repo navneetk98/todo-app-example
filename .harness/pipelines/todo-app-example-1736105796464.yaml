@@ -26,13 +26,24 @@ pipeline:
                     command: npm install
                   timeout: ""
                   type: Run
-              - step:
-                  identifier: test
-                  name: test
-                  spec:
-                    command: npm run test
-                  timeout: ""
-                  type: Run
+              - parallel:
+                  - step:
+                      identifier: test
+                      name: test
+                      spec:
+                        command: npm run test
+                      timeout: ""
+                      type: Run
+                  - step:
+                      type: BuildAndPushDockerRegistry
+                      name: BuildAndPushDockerRegistry_2
+                      identifier: BuildAndPushDockerRegistry_2
+                      spec:
+                        connectorRef: docker_hub
+                        repo: navneet-todo-test
+                        tags:
+                          - docker_build_2
+                        caching: true
               - step:
                   identifier: dockerbuild
                   name: docker_build
@@ -51,6 +62,8 @@ pipeline:
             type: Cloud
             spec: {}
         type: CI
+        delegateSelectors:
+          - kubernetes-delegate-laptop
     - stage:
         name: dpeloy
         identifier: dpeloy
