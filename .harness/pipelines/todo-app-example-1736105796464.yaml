@@ -40,7 +40,7 @@ pipeline:
                       identifier: BuildAndPushDockerRegistry_2
                       spec:
                         connectorRef: docker_hub
-                        repo: navneet-todo-test
+                        repo: iamnavneet/navneet-todo-test
                         tags:
                           - docker_build_2
                         caching: true
