@@ -77,26 +77,17 @@ pipeline:
               - identifier: mac_local_infra
           execution:
             steps:
-              - parallel:
-                  - step:
-                      name: Rollout Deployment
-                      identifier: rolloutDeployment
-                      type: K8sRollingDeploy
-                      timeout: 10m
+              - step:
+                  type: K8sCanaryDeploy
+                  name: K8sCanaryDeploy_1
+                  identifier: K8sCanaryDeploy_1
+                  spec:
+                    skipDryRun: false
+                    instanceSelection:
+                      type: Count
                       spec:
-                        skipDryRun: false
-                        pruningEnabled: false
-                  - step:
-                      type: K8sCanaryDeploy
-                      name: K8sCanaryDeploy_1
-                      identifier: K8sCanaryDeploy_1
-                      spec:
-                        skipDryRun: false
-                        instanceSelection:
-                          type: Count
-                          spec:
-                            count: 1
-                      timeout: 10m
+                        count: 1
+                  timeout: 10m
             rollbackSteps:
               - step:
                   name: Rollback Rollout Deployment
@@ -105,6 +96,101 @@ pipeline:
                   timeout: 10m
                   spec:
                     pruningEnabled: false
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
+    - stage:
+        name: push build to prod
+        identifier: push_build_to_prod
+        description: ""
+        type: Approval
+        spec:
+          execution:
+            steps:
+              - step:
+                  name: Push to prod approvals
+                  identifier: Push_to_prod_approvals
+                  type: HarnessApproval
+                  timeout: 1d
+                  spec:
+                    approvalMessage: |-
+                      Please review the following information
+                      and approve the pipeline progression
+                    includePipelineExecutionHistory: true
+                    approvers:
+                      minimumCount: 1
+                      disallowPipelineExecutor: false
+                      userGroups:
+                        - approvers
+                    isAutoRejectEnabled: true
+                    approverInputs: []
+        tags: {}
+    - stage:
+        name: deploy to prod
+        identifier: deploy_to_prod
+        description: ""
+        type: Deployment
+        spec:
+          deploymentType: Kubernetes
+          service:
+            useFromStage:
+              stage: dpeloy
+          environment:
+            environmentRef: prod
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: mac_local_infra
+          execution:
+            steps:
+              - stepGroup:
+                  name: Canary Deployment
+                  identifier: canaryDeployment
+                  steps:
+                    - step:
+                        name: Canary Deployment
+                        identifier: canaryDeployment
+                        type: K8sCanaryDeploy
+                        timeout: 10m
+                        spec:
+                          instanceSelection:
+                            type: Count
+                            spec:
+                              count: 1
+                          skipDryRun: false
+                    - step:
+                        name: Canary Delete
+                        identifier: canaryDelete
+                        type: K8sCanaryDelete
+                        timeout: 10m
+                        spec: {}
+              - stepGroup:
+                  name: Primary Deployment
+                  identifier: primaryDeployment
+                  steps:
+                    - step:
+                        name: Rolling Deployment
+                        identifier: rollingDeployment
+                        type: K8sRollingDeploy
+                        timeout: 10m
+                        spec:
+                          skipDryRun: false
+            rollbackSteps:
+              - step:
+                  name: Canary Delete
+                  identifier: rollbackCanaryDelete
+                  type: K8sCanaryDelete
+                  timeout: 10m
+                  spec: {}
+              - step:
+                  name: Rolling Rollback
+                  identifier: rollingRollback
+                  type: K8sRollingRollback
+                  timeout: 10m
+                  spec: {}
         tags: {}
         failureStrategies:
           - onFailure:
