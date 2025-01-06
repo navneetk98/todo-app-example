@@ -26,30 +26,19 @@ pipeline:
                     command: npm install
                   timeout: ""
                   type: Run
-              - parallel:
-                  - step:
-                      identifier: test
-                      name: test
-                      spec:
-                        command: npm run test
-                      timeout: ""
-                      type: Run
-                  - step:
-                      type: BuildAndPushDockerRegistry
-                      name: BuildAndPushDockerRegistry_2
-                      identifier: BuildAndPushDockerRegistry_2
-                      spec:
-                        connectorRef: docker_hub
-                        repo: iamnavneet/navneet-todo-test
-                        tags:
-                          - docker_build_2
-                        caching: true
+              - step:
+                  identifier: test
+                  name: test
+                  spec:
+                    command: npm run test
+                  timeout: ""
+                  type: Run
               - step:
                   identifier: dockerbuild
                   name: docker_build
                   spec:
                     connectorRef: <+input>
-                    repo: navneet-todo-test
+                    repo: iamnavneet/navneet-todo-test
                     tags:
                       - latest
                     caching: true
