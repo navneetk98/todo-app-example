@@ -77,14 +77,26 @@ pipeline:
               - identifier: mac_local_infra
           execution:
             steps:
-              - step:
-                  name: Rollout Deployment
-                  identifier: rolloutDeployment
-                  type: K8sRollingDeploy
-                  timeout: 10m
-                  spec:
-                    skipDryRun: false
-                    pruningEnabled: false
+              - parallel:
+                  - step:
+                      name: Rollout Deployment
+                      identifier: rolloutDeployment
+                      type: K8sRollingDeploy
+                      timeout: 10m
+                      spec:
+                        skipDryRun: false
+                        pruningEnabled: false
+                  - step:
+                      type: K8sCanaryDeploy
+                      name: K8sCanaryDeploy_1
+                      identifier: K8sCanaryDeploy_1
+                      spec:
+                        skipDryRun: false
+                        instanceSelection:
+                          type: Count
+                          spec:
+                            count: 1
+                      timeout: 10m
             rollbackSteps:
               - step:
                   name: Rollback Rollout Deployment
